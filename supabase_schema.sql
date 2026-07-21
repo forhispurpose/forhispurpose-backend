@@ -69,11 +69,12 @@ create table if not exists testimonies (
 
 create table if not exists posts (
   id bigint generated always as identity primary key,
-  type text not null check (type in ('devotional', 'article')),
+  type text not null check (type in ('devotional', 'article', 'testimony', 'episode')),
   title text not null,
   scripture_ref text,
   body text not null,
   author text default 'Founder',
+  link text,
   published_at date not null default current_date,
   created_at timestamptz not null default now()
 );
