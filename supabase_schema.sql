@@ -67,6 +67,18 @@ create table if not exists testimonies (
   created_at timestamptz not null default now()
 );
 
+create table if not exists posts (
+  id bigint generated always as identity primary key,
+  type text not null check (type in ('devotional', 'article')),
+  title text not null,
+  scripture_ref text,
+  body text not null,
+  author text default 'Founder',
+  published_at date not null default current_date,
+  created_at timestamptz not null default now()
+);
+create index if not exists posts_type_published_idx on posts (type, published_at desc);
+
 -- Row Level Security: keep these tables closed to the public API/anon key.
 -- The backend uses the SERVICE ROLE key (server-side only, bypasses RLS), so
 -- enabling RLS here just guarantees no one can read/write these tables directly
@@ -78,3 +90,4 @@ alter table bible_study_signups enable row level security;
 alter table mentorship_applications enable row level security;
 alter table volunteer_interest enable row level security;
 alter table testimonies enable row level security;
+alter table posts enable row level security;

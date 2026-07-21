@@ -37,6 +37,16 @@ const formLimiter = rateLimit({
   message: { ok: false, error: 'Too many submissions from this device. Please try again later.' }
 });
 
+// ---- Rate limiting for /api/posts: generous, since every visitor to the
+// devotionals/articles pages triggers a read (not a form submission). ----
+const postsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, error: 'Too many requests. Please try again shortly.' }
+});
+
 // ---- Health check (used to verify the Space is awake and reachable) ----
 app.get('/', (req, res) => {
   res.json({
@@ -46,6 +56,12 @@ app.get('/', (req, res) => {
     time: new Date().toISOString()
   });
 });
+
+// ---- Devotionals & articles (public read, password-protected write) ----
+// Registered BEFORE the generic /api form router below, since that router
+// matches POST /api/:formType and would otherwise swallow /api/posts first.
+const postsRouter = require('./routes/posts');
+app.use('/api/posts', postsLimiter, postsRouter);
 
 // ---- Form submission routes ----
 const formsRouter = require('./routes/forms');
